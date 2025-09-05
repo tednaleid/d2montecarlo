@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./d2montecarlo.py)",
+      "Bash(uvx ruff check:*)",
+      "Bash(uvx ruff format:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
