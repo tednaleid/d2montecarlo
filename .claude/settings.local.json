@@ -3,7 +3,9 @@
     "allow": [
       "Bash(./d2montecarlo.py)",
       "Bash(uvx ruff check:*)",
-      "Bash(uvx ruff format:*)"
+      "Bash(uvx ruff format:*)",
+      "Bash(./d2montecarlo.py --help)",
+      "Bash(./d2montecarlo.py --starting-power 300)"
     ],
     "deny": [],
     "ask": []

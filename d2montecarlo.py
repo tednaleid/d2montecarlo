@@ -1,4 +1,5 @@
 #!/usr/bin/env -S uv run --script
+import argparse
 import random
 import statistics
 from typing import List, Tuple
@@ -101,10 +102,31 @@ def run_scenario_analysis(
     }
 
 
-N = 10000 
+# Parse command-line arguments
+parser = argparse.ArgumentParser(
+    description="Monte Carlo simulation for Destiny 2 power level progression"
+)
+parser.add_argument(
+    "--starting-power",
+    type=int,
+    default=400,
+    help="Starting power level (default: 400, min: 10, max: power_cap-1)",
+)
+args = parser.parse_args()
+
+# Configuration
+N = 10000
 power_cap = 450
-starting_power = 400
+starting_power = args.starting_power
 prime_chance = 0.075
+
+# Validate starting_power
+if starting_power < 10:
+    print(f"Error: starting_power ({starting_power}) must be at least 10")
+    exit(1)
+if starting_power >= power_cap:
+    print(f"Error: starting_power ({starting_power}) must be less than power_cap ({power_cap})")
+    exit(1)
 
 scenarios = {
     "Original (0 power bump at 400+)": [
