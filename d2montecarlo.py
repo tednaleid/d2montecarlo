@@ -27,7 +27,7 @@ def get_power_bumps(
 
 
 def run_simulation(
-    power_cap=450, starting_power=400, prime_chance=0.075, progression_rules=None
+    power_cap=550, starting_power=400, target_power=550, prime_chance=0.075, progression_rules=None
 ):
     """
     Run a single simulation of power progression.
@@ -35,6 +35,7 @@ def run_simulation(
     Args:
         power_cap: Target power level to reach
         starting_power: Initial power level for all gear
+        target_power: Power level to stop running activities
         prime_chance: Probability of getting a prime drop
         progression_rules: List of (threshold, power_bump, prime_bump) tuples
 
@@ -55,7 +56,7 @@ def run_simulation(
     gear = [starting_power for _ in range(8)]
     account_power = sum(gear) // 8
 
-    while account_power < power_cap:
+    while account_power < target_power:
         activity_count += 1
         power_bump, prime_bump = get_power_bumps(account_power, progression_rules)
 
@@ -74,7 +75,7 @@ def run_simulation(
 
 
 def run_scenario_analysis(
-    N, scenario_name, power_cap, starting_power, prime_chance, progression_rules
+    N, scenario_name, power_cap, starting_power, target_power, prime_chance, progression_rules
 ):
     """Run N simulations for a specific scenario and return statistics."""
     activity_counts = []
@@ -82,7 +83,7 @@ def run_scenario_analysis(
 
     for _ in range(N):
         activities, primes, _ = run_simulation(
-            power_cap, starting_power, prime_chance, progression_rules
+            power_cap, starting_power, target_power, prime_chance, progression_rules
         )
         activity_counts.append(activities)
         prime_counts.append(primes)
@@ -112,11 +113,18 @@ parser.add_argument(
     default=400,
     help="Starting power level (default: 400, min: 10, max: power_cap-1)",
 )
+parser.add_argument(
+    "--target-power",
+    type=int,
+    default=450,
+    help="Target power level (default: 550, min: 10, max: power_cap)",
+)
 args = parser.parse_args()
 
 # Configuration
 N = 10000
-power_cap = 450
+power_cap = 550
+target_power = args.target_power
 starting_power = args.starting_power
 prime_chance = 0.075
 
@@ -126,6 +134,14 @@ if starting_power < 10:
     exit(1)
 if starting_power >= power_cap:
     print(f"Error: starting_power ({starting_power}) must be less than power_cap ({power_cap})")
+    exit(1)
+
+# Validate target_power
+if target_power <= starting_power:
+    print(f"Error: target_power ({target_power}) must be greater than starting_power ({starting_power})")
+    exit(1)
+if target_power > power_cap:
+    print(f"Error: target_power ({target_power}) must be less than or equal to power_cap ({power_cap})")
     exit(1)
 
 scenarios = {
@@ -148,7 +164,7 @@ results = []
 for scenario_name, rules in scenarios.items():
     print(f"Running {N} simulations for: {scenario_name}")
     stats = run_scenario_analysis(
-        N, scenario_name, power_cap, starting_power, prime_chance, rules
+        N, scenario_name, power_cap, starting_power, target_power, prime_chance, rules
     )
     results.append(stats)
     print(f"  Completed - Mean activities: {stats['activity_mean']:.1f}\n")
@@ -156,13 +172,13 @@ for scenario_name, rules in scenarios.items():
 # Display comparison results
 print("=" * 60)
 print(f"SCENARIO COMPARISON - {N} simulations each")
-print(f"Target: {starting_power} → {power_cap} power")
+print(f"Target: {starting_power} → {target_power} power")
 print(f"Prime chance: {prime_chance:.1%}")
 print("=" * 60)
 
 for stats in results:
     print(f"\n{stats['name']}:")
-    print("  Activities to reach cap:")
+    print(f"  Activities to reach target_power ({target_power}):")
     print(f"    Mean: {stats['activity_mean']:.1f}")
     print(f"    Median: {stats['activity_median']:.1f}")
     print(f"    Std Dev: {stats['activity_stdev']:.1f}")
