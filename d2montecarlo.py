@@ -146,14 +146,14 @@ if target_power > power_cap:
 
 scenarios = {
     "Original (0 power bump at 400+)": [
-        (450, 0, 2),  # At 400+: power_bump=0, prime_bump=3
+        (450, 0, 2),  # At 400+: power_bump=0, prime_bump=2
         (400, 0, 3),  # At 400+: power_bump=0, prime_bump=3
         (297, 3, 4),  # At 297+: power_bump=3, prime_bump=4
         (196, 4, 5),  # At 196+: power_bump=4, prime_bump=5
         (0, 6, 7),  # Below 196: power_bump=6, prime_bump=7
     ],
     "Modified (+1 power bump at 400+)": [
-        (450, 1, 2),  # At 400+: power_bump=0, prime_bump=3
+        (450, 1, 2),  # At 400+: power_bump=1, prime_bump=2 (CHANGED)
         (400, 1, 3),  # At 400+: power_bump=1, prime_bump=3 (CHANGED)
         (297, 3, 4),  # At 297+: power_bump=3, prime_bump=4
         (196, 4, 5),  # At 196+: power_bump=4, prime_bump=5
