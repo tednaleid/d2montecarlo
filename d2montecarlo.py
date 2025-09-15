@@ -78,28 +78,28 @@ def run_scenario_analysis(
     N, scenario_name, power_cap, starting_power, target_power, prime_chance, progression_rules
 ):
     """Run N simulations for a specific scenario and return statistics."""
-    activity_counts = []
+    completion_reward_counts = []
     prime_counts = []
 
     for _ in range(N):
-        activities, primes, _ = run_simulation(
+        completion_rewards, primes, _ = run_simulation(
             power_cap, starting_power, target_power, prime_chance, progression_rules
         )
-        activity_counts.append(activities)
+        completion_reward_counts.append(completion_rewards)
         prime_counts.append(primes)
 
     return {
         "name": scenario_name,
-        "activity_mean": statistics.mean(activity_counts),
-        "activity_median": statistics.median(activity_counts),
-        "activity_stdev": statistics.stdev(activity_counts),
-        "activity_min": min(activity_counts),
-        "activity_max": max(activity_counts),
-        "activity_25th": statistics.quantiles(activity_counts, n=4)[0],
-        "activity_75th": statistics.quantiles(activity_counts, n=4)[2],
+        "activity_mean": statistics.mean(completion_reward_counts),
+        "activity_median": statistics.median(completion_reward_counts),
+        "activity_stdev": statistics.stdev(completion_reward_counts),
+        "activity_min": min(completion_reward_counts),
+        "activity_max": max(completion_reward_counts),
+        "activity_25th": statistics.quantiles(completion_reward_counts, n=4)[0],
+        "activity_75th": statistics.quantiles(completion_reward_counts, n=4)[2],
         "prime_mean": statistics.mean(prime_counts),
         "prime_median": statistics.median(prime_counts),
-        "prime_rate": sum(prime_counts) / sum(activity_counts),
+        "prime_rate": sum(prime_counts) / sum(completion_reward_counts),
     }
 
 
@@ -152,15 +152,22 @@ scenarios = {
     #     (196, 4, 5),  # At 196+: power_bump=4, prime_bump=5
     #     (0, 6, 7),  # Below 196: power_bump=6, prime_bump=7
     # ],
-    "Ash and Iron start (+1 power bump at 450+)": [
-        (450, 1, 2),  # At 400+: power_bump=1, prime_bump=2 (CHANGED)
-        (400, 1, 3),  # At 400+: power_bump=1, prime_bump=3 (CHANGED)
+    # "Ash and Iron start (+1 power bump at 450+)": [
+    #     (450, 1, 2),  # At 450+: power_bump=1, prime_bump=2 (CHANGED)
+    #     (400, 1, 3),  # At 400+: power_bump=1, prime_bump=3 (CHANGED)
+    #     (297, 3, 4),  # At 297+: power_bump=3, prime_bump=4
+    #     (196, 4, 5),  # At 196+: power_bump=4, prime_bump=5
+    #     (0, 6, 7),  # Below 196: power_bump=6, prime_bump=7
+    # ],
+    "Ash and Iron live patch (+2 power bump at 450+, still +2 primes)": [
+        (450, 2, 2),  # At 450+: power_bump=2, prime_bump=2 (CHANGED)
+        (400, 2, 3),  # At 400+: power_bump=2, prime_bump=3 (CHANGED)
         (297, 3, 4),  # At 297+: power_bump=3, prime_bump=4
         (196, 4, 5),  # At 196+: power_bump=4, prime_bump=5
         (0, 6, 7),  # Below 196: power_bump=6, prime_bump=7
     ],
     "Ash and Iron 9.1.0.1 (+2 power bump at 450+, +3 primes)": [
-        (450, 2, 3),  # At 400+: power_bump=2, prime_bump=3 (CHANGED)
+        (450, 2, 3),  # At 450+: power_bump=2, prime_bump=3 (CHANGED)
         (400, 2, 3),  # At 400+: power_bump=2, prime_bump=3 (CHANGED)
         (297, 3, 4),  # At 297+: power_bump=3, prime_bump=4
         (196, 4, 5),  # At 196+: power_bump=4, prime_bump=5
@@ -176,7 +183,7 @@ for scenario_name, rules in scenarios.items():
         N, scenario_name, power_cap, starting_power, target_power, prime_chance, rules
     )
     results.append(stats)
-    print(f"  Completed - Mean activities: {stats['activity_mean']:.1f}\n")
+    print(f"  Completed - Mean completion rewards: {stats['activity_mean']:.1f}\n")
 
 # Display comparison results
 print("=" * 60)
@@ -187,13 +194,13 @@ print("=" * 60)
 
 for stats in results:
     print(f"\n{stats['name']}:")
-    print(f"  Activities to reach target_power ({target_power}):")
+    print(f"  Completion rewards to reach target_power ({target_power}):")
     print(f"    Mean: {stats['activity_mean']:.1f}")
     print(f"    Median: {stats['activity_median']:.1f}")
     print(f"    Std Dev: {stats['activity_stdev']:.1f}")
     print(f"    Range: {stats['activity_min']}-{stats['activity_max']}")
     print(
-        f"    50% of runs: {stats['activity_25th']:.0f}-{stats['activity_75th']:.0f} activities"
+        f"    50% of runs: {stats['activity_25th']:.0f}-{stats['activity_75th']:.0f} completion rewards."
     )
     print("  Prime drops:")
     print(f"    Mean: {stats['prime_mean']:.1f}")
@@ -201,7 +208,7 @@ for stats in results:
 
 # Summary comparison
 print("\n" + "=" * 60)
-print("SUMMARY - Activities needed (mean):")
+print("SUMMARY - Completion rewards needed (mean):")
 for stats in results:
     baseline = results[0]["activity_mean"]
     diff = stats["activity_mean"] - baseline
